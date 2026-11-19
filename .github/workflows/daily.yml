@@ -1,6 +1,16 @@
 name: 每日更新
 
 on:
+  push:
+    branches: ["main"]
+    paths:
+      - "docs/**"
+      - "state/**"
+      - "scripts/**"
+      - "core/**"
+      - "config.json"
+      - "requirements.txt"
+      - ".github/workflows/daily.yml"
   schedule:
     # GitHub Actions 的 cron 用 UTC 时间，以下对应北京时间
     - cron: "20 23 * * *"   # 07:20

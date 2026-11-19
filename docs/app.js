@@ -2,7 +2,7 @@
 
 const DATA = window.__DIGEST__ || null;
 const $ = (sel) => document.querySelector(sel);
-const state = { selected: null };
+const state = { selected: null, category: "all" };
 
 const ICON_DOC = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg>`;
 const ICON_DOWNLOAD = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>`;
@@ -44,6 +44,17 @@ function countOf(day) {
   return found ? found.count : 0;
 }
 
+function categoryOf(item) {
+  const name = String(item.source_name || "").trim();
+  if (!name) return "其他";
+  const parts = name.split("·");
+  return (parts[parts.length - 1] || name).trim();
+}
+
+function itemsOfDay(day) {
+  return day === "all" ? DATA.items : DATA.items.filter((item) => item.day === day);
+}
+
 function dataTodayLabel() {
   return DATA.today === clientToday() ? "今天" : fmtDate(DATA.today);
 }
@@ -79,7 +90,35 @@ function renderChips() {
   document.querySelectorAll("#dayChips .chip").forEach((btn) => {
     btn.addEventListener("click", () => {
       state.selected = btn.dataset.day;
+      state.category = "all";
       renderChips();
+      renderCats();
+      renderNews();
+    });
+  });
+}
+
+function renderCats() {
+  const items = itemsOfDay(state.selected);
+  const counts = {};
+  items.forEach((item) => {
+    const cat = categoryOf(item);
+    counts[cat] = (counts[cat] || 0) + 1;
+  });
+  if (state.category !== "all" && !counts[state.category]) state.category = "all";
+
+  const chips = [{ key: "all", label: "全部", count: items.length }];
+  Object.keys(counts).forEach((cat) => chips.push({ key: cat, label: cat, count: counts[cat] }));
+
+  $("#catChips").innerHTML = chips.map((chip) => `
+    <button class="chip${state.category === chip.key ? " active" : ""}" data-cat="${esc(chip.key)}" type="button">
+      ${esc(chip.label)} <b>${chip.count}</b>
+    </button>`).join("");
+
+  document.querySelectorAll("#catChips .chip").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.category = btn.dataset.cat;
+      renderCats();
       renderNews();
     });
   });
@@ -87,25 +126,42 @@ function renderChips() {
 
 function renderNews() {
   const list = $("#newsList");
-  const items = state.selected === "all"
-    ? DATA.items
-    : DATA.items.filter((item) => item.day === state.selected);
+  const dayItems = itemsOfDay(state.selected);
+  const items = state.category === "all"
+    ? dayItems
+    : dayItems.filter((item) => categoryOf(item) === state.category);
 
   if (!items.length) {
-    const latest = (DATA.days || [])[0];
-    const canJump = latest && latest.day !== state.selected;
-    list.innerHTML = `
-      <div class="empty">
-        <div class="big">${state.selected === DATA.today ? "今天还没有消息" : "这一天没有收录消息"}</div>
-        页面每天 07:20 / 12:10 / 18:10 / 22:10（北京时间）自动抓取，学校发布后会出现在这里。
-        ${canJump ? `<div><button class="btn primary" type="button" id="btnLatest">
-          看看最近一天（${esc(fmtDate(latest.day))}）</button></div>` : ""}
-      </div>`;
-    const jump = $("#btnLatest");
-    if (jump) {
-      jump.addEventListener("click", () => {
-        state.selected = latest.day;
-        renderChips();
+    if (!dayItems.length) {
+      const latest = (DATA.days || [])[0];
+      const canJump = latest && latest.day !== state.selected;
+      list.innerHTML = `
+        <div class="empty">
+          <div class="big">${state.selected === DATA.today ? "今天还没有消息" : "这一天没有收录消息"}</div>
+          页面每天 07:20 / 12:10 / 18:10 / 22:10（北京时间）自动抓取，学校发布后会出现在这里。
+          ${canJump ? `<div><button class="btn primary" type="button" id="btnLatest">
+            看看最近一天（${esc(fmtDate(latest.day))}）</button></div>` : ""}
+        </div>`;
+      const jump = $("#btnLatest");
+      if (jump) {
+        jump.addEventListener("click", () => {
+          state.selected = latest.day;
+          state.category = "all";
+          renderChips();
+          renderCats();
+          renderNews();
+        });
+      }
+    } else {
+      list.innerHTML = `
+        <div class="empty">
+          <div class="big">「${esc(state.category)}」分类下没有消息</div>
+          这一天共有 ${dayItems.length} 条，换个分类看看。
+          <div><button class="btn primary" type="button" id="btnAllCats">看全部分类</button></div>
+        </div>`;
+      $("#btnAllCats").addEventListener("click", () => {
+        state.category = "all";
+        renderCats();
         renderNews();
       });
     }
@@ -224,6 +280,7 @@ function init() {
   renderHeader();
   renderStale();
   renderChips();
+  renderCats();
   renderNews();
   renderDigest();
   renderHistory();

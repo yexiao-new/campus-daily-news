@@ -118,6 +118,7 @@ git push -u origin main
 - 每次运行会：抓取 → 生成当天 Word → 更新页面 → 自动提交数据，你不用做任何事
 - 改数据源：直接在 GitHub 网页上改 `config.json` → Commit → Actions 手动跑一次
 - 手动重跑：Actions →「每日更新」→ **Run workflow**
+- 改了页面/代码后，只要 push 到 `main` 就会自动重新部署（workflow 里已配置 push 触发）
 
 ## 常见问题
 
