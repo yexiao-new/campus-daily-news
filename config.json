@@ -1,0 +1,80 @@
+{
+  "app": {
+    "name": "校园每日快讯",
+    "version": "0.2.0"
+  },
+  "digest": {
+    "time": "08:00",
+    "limit": 60
+  },
+  "sources": [
+    {
+      "id": "cau_tzgg",
+      "name": "中国农大 · 通知公告",
+      "type": "html",
+      "enabled": true,
+      "url": "https://www.cau.edu.cn/tzgg/index.htm",
+      "max_items": 20,
+      "fetch_detail": true,
+      "selectors": {
+        "item": "li .item",
+        "title": "a.title",
+        "link": "a.title",
+        "date": ".time_box",
+        "summary": "",
+        "detail": ".article"
+      }
+    },
+    {
+      "id": "cau_news",
+      "name": "中国农大 · 综合新闻",
+      "type": "html",
+      "enabled": true,
+      "url": "https://news.cau.edu.cn/zhxwnew/index.htm",
+      "max_items": 15,
+      "fetch_detail": true,
+      "selectors": {
+        "item": "ul.ttgzList li",
+        "title": ".title",
+        "link": "a",
+        "date": ".date",
+        "summary": "",
+        "detail": ".article"
+      }
+    },
+    {
+      "id": "cau_jcdt",
+      "name": "中国农大 · 基层动态",
+      "type": "html",
+      "enabled": true,
+      "url": "https://news.cau.edu.cn/jcdt/index.htm",
+      "max_items": 15,
+      "fetch_detail": true,
+      "selectors": {
+        "item": "ul.ttgzList li",
+        "title": ".title",
+        "link": "a",
+        "date": ".date",
+        "summary": "",
+        "detail": ".article"
+      }
+    },
+    {
+      "id": "demo",
+      "name": "示例数据源",
+      "type": "demo",
+      "enabled": false,
+      "url": "",
+      "max_items": 30,
+      "fetch_detail": false,
+      "selectors": {
+        "item": "",
+        "title": "a",
+        "link": "a",
+        "date": "",
+        "summary": "",
+        "detail": ""
+      }
+    }
+  ]
+}

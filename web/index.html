@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>校园每日快讯</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">讯</div>
+      <div class="brand-text">
+        <h1>校园每日快讯</h1>
+        <p>校园官网新消息 · 每日自动汇编成 Word</p>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="today" id="todayPill">—</div>
+      <button class="btn ghost" id="btnCrawl">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+        立即抓取
+      </button>
+      <button class="btn primary" id="btnDigest">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg>
+        生成今日 Word
+      </button>
+      <button class="btn icon" id="btnSettings" title="设置" aria-label="设置">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="card feed">
+      <div class="feed-head">
+        <div class="feed-title">
+          <h2>消息流</h2>
+          <p class="muted small" id="feedMeta">正在加载…</p>
+        </div>
+        <nav class="chips" id="dayChips"></nav>
+      </div>
+      <div id="newsList" class="news-list">
+        <div class="empty"><div class="spinner"></div>正在读取数据…</div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="card digest-card" id="digestCard"></section>
+
+      <section class="card">
+        <div class="card-head">
+          <h3>历史文档</h3>
+          <span class="muted small" id="docCount"></span>
+        </div>
+        <div class="history" id="historyList"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h3>数据源</h3>
+          <button class="link-btn" id="btnOpenSettings">编辑</button>
+        </div>
+        <div class="sources" id="sourceList"></div>
+        <div class="schedule" id="scheduleLine"></div>
+      </section>
+    </aside>
+  </main>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <div class="modal" id="settingsModal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <h3>设置</h3>
+          <p class="muted small">配置抓取来源与每日自动生成时间</p>
+        </div>
+        <button class="btn icon" data-close aria-label="关闭">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <label class="field time-field">
+          <span>每日自动生成时间</span>
+          <input type="time" id="digestTime" />
+        </label>
+        <p class="hint">到点后自动抓取并生成当天的 Word 文档；软件需要保持运行。</p>
+
+        <div class="section-title">数据源</div>
+        <div id="sourceEditor" class="source-editor"></div>
+        <button class="btn ghost add-source" id="btnAddSource">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          添加数据源
+        </button>
+        <p class="hint">
+          「列表项」是新闻列表里每一条的 CSS 选择器，例如 <code>ul.news-list li</code>；
+          「标题 / 链接」相对列表项填写，通常都是 <code>a</code>。留空则自动识别。
+        </p>
+      </div>
+      <div class="modal-foot">
+        <button class="btn ghost" data-close>取消</button>
+        <button class="btn primary" id="btnSave">保存设置</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
